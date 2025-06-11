@@ -26,13 +26,13 @@ phases:
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPO_NAME:$IMAGE_TAG
   post_build:
     commands:
-      - echo "✅ Build complete. Updating rollout_red.yaml in GitOps repo (branch: $GITOPS_BRANCH)..."
-      - GIT_HTTPS_URL="https://$GITHUB_TOKEN@github.com/$GITHUB_OWNER/$GITOPS_REPO.git"
-      - git clone -b $GITOPS_BRANCH $GIT_HTTPS_URL
-      - cd $GITOPS_REPO/resource
-      - sed -i "s|image: .*|image: $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPO_NAME:$IMAGE_TAG|g" rollout_red.yaml
-      - git config user.email "codebuild@$AWS_REGION.amazonaws.com"
-      - git config user.name "CodeBuild"
-      - git add rollout_red.yaml
-      - git commit -m "chore: update red rollout image to $IMAGE_TAG"
-      - git push $GIT_HTTPS_URL $GITOPS_BRANCH
+      - |
+        GIT_HTTPS_URL="https://$GITHUB_TOKEN@github.com/$GITHUB_OWNER/$GITOPS_REPO.git" \
+        && git clone -b $GITOPS_BRANCH $GIT_HTTPS_URL \
+        && cd $GITOPS_REPO/resource \
+        && sed "s|image: .*|image: \$ACCOUNT_ID.dkr.ecr.\$AWS_REGION.amazonaws.com/\$REPO_NAME:\$IMAGE_TAG|" red_rollout.yaml > tmpfile && mv tmpfile red_rollout.yaml \
+        && git config user.email "codebuild@$AWS_REGION.amazonaws.com" \
+        && git config user.name "CodeBuild" \
+        && git add rollout_red.yaml \
+        && git commit -m "chore: update red rollout image to $IMAGE_TAG" \
+        && git push $GIT_HTTPS_URL $GITOPS_BRANCH
