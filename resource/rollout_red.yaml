@@ -1,12 +1,11 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
-  name: red-deployment
+  name: red-rollout
   namespace: skills
-  labels:
-    app: red
 spec:
   replicas: 2
+  revisionHistoryLimit: 2
   selector:
     matchLabels:
       app: red
@@ -24,8 +23,20 @@ spec:
         ports:
         - containerPort: 8080
         resources:
-          requests:
-            cpu: "0.5"
+            requests:
+              cpu: "0.5"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
         env:
           - name: DB_USER
             valueFrom:
@@ -42,3 +53,8 @@ spec:
               secretKeyRef:
                 name: db-secret
                 key: DB_URL
+  strategy:
+    blueGreen:
+      activeService: red-active
+      previewService: red-preview
+      autoPromotionEnabled: true
