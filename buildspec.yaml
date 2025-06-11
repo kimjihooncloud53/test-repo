@@ -1,0 +1,37 @@
+version: 0.2
+
+env:
+  shell: bash
+  variables:
+    ACCOUNT_ID: "323974325951"
+    AWS_REGION: "ap-northeast-2"
+    REPO_NAME: "red"
+    GITOPS_REPO: "test-repo"
+    GITHUB_OWNER: "kimjihooncloud53"
+    GITOPS_BRANCH: "red"
+phases:
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_REGION \
+        | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - IMAGE_TAG=$(date '+%Y%m%d%H%M%S')
+      - echo "IMAGE_TAG=$IMAGE_TAG"
+  build:
+    commands:
+      - echo "Building Docker image..."
+      - docker build -t $REPO_NAME:$IMAGE_TAG .
+      - docker tag $REPO_NAME:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPO_NAME:$IMAGE_TAG
+      - docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPO_NAME:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo "✅ Build complete. Updating rollout_red.yaml in GitOps repo (branch: $GITOPS_BRANCH)..."
+      - GIT_HTTPS_URL="https://$GITHUB_TOKEN@github.com/$GITHUB_OWNER/$GITOPS_REPO.git"
+      - git clone -b $GITOPS_BRANCH $GIT_HTTPS_URL
+      - cd $GITOPS_REPO/resource
+      - sed -i "s|image: .*|image: $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPO_NAME:$IMAGE_TAG|g" rollout_red.yaml
+      - git config user.email "codebuild@$AWS_REGION.amazonaws.com"
+      - git config user.name "CodeBuild"
+      - git add rollout_red.yaml
+      - git commit -m "chore: update red rollout image to $IMAGE_TAG"
+      - git push $GIT_HTTPS_URL $GITOPS_BRANCH
