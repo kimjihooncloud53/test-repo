@@ -8,7 +8,7 @@ env:
     REPO_NAME: "red"
     GITOPS_REPO: "test-repo"
     GITHUB_OWNER: "kimjihooncloud53"
-    GITOPS_BRANCH: "red"
+    GITOPS_BRANCH: "gitops-red"
 
 phases:
   pre_build:
