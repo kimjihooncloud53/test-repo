@@ -32,6 +32,6 @@ phases:
         && sed "s|image: .*|image: \$ACCOUNT_ID.dkr.ecr.\$AWS_REGION.amazonaws.com/\$REPO_NAME:\$IMAGE_TAG|" red_rollout.yaml > tmpfile && mv tmpfile red_rollout.yaml \
         && git config user.email "codebuild@$AWS_REGION.amazonaws.com" \
         && git config user.name "CodeBuild" \
-        && git add rollout_red.yaml \
+        && git add red_rollout.yaml \
         && git commit -m "chore: update red rollout image to $IMAGE_TAG" \
         && git push $GIT_HTTPS_URL $GITOPS_BRANCH
