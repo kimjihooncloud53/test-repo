@@ -34,4 +34,3 @@ phases:
         && git config user.name "CodeBuild" \
         && git add rollout_red.yaml \
         && git commit -m "chore: update red rollout image to $IMAGE_TAG" \
-        && git push $GIT_HTTPS_URL $GITOPS_BRANCH
