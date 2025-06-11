@@ -29,9 +29,9 @@ phases:
         GIT_HTTPS_URL="https://$GITHUB_TOKEN@github.com/$GITHUB_OWNER/$GITOPS_REPO.git" \
         && git clone -b $GITOPS_BRANCH $GIT_HTTPS_URL \
         && cd $GITOPS_REPO/resource \
-        && sed "s|image: .*|image: \$ACCOUNT_ID.dkr.ecr.\$AWS_REGION.amazonaws.com/\$REPO_NAME:\$IMAGE_TAG|" red_rollout.yaml > tmpfile && mv tmpfile red_rollout.yaml \
+        && sed "s|image: .*|image: $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPO_NAME:$IMAGE_TAG|" rollout_red.yaml > tmpfile && mv tmpfile rollout_red.yaml \
         && git config user.email "codebuild@$AWS_REGION.amazonaws.com" \
         && git config user.name "CodeBuild" \
-        && git add red_rollout.yaml \
+        && git add rollout_red.yaml \
         && git commit -m "chore: update red rollout image to $IMAGE_TAG" \
         && git push $GIT_HTTPS_URL $GITOPS_BRANCH
