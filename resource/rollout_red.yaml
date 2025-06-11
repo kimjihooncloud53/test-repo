@@ -19,7 +19,7 @@ spec:
         eks.amazonaws.com/nodegroup: gj2025-eks-app-nodegroup
       containers:
       - name: red
-        image: 323974325951.dkr.ecr.ap-northeast-2.amazonaws.com/red:20250611085602
+        image: 323974325951.dkr.ecr.ap-northeast-2.amazonaws.com/red:20250611085706
         ports:
         - containerPort: 8080
         resources:
